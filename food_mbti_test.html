@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="智味食空 · 美食MBTI人格测试 - 24个问题找到你的美食人格">
+<meta property="og:title" content="智味食空 · 美食人格测试">
+<meta property="og:description" content="你的味觉，脱不了你的人格。24个问题找到你的美食人格。">
+<meta property="og:type" content="website">
+<title>智味食空 · 美食人格测试</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :root {
+    --primary: #1ca05c;
+    --primary-dark: #158049;
+    --primary-light: #e8f5e9;
+    --primary-bg: #eaf7ee;
+    --accent: #ffb74d;
+    --bg: #fffef4;
+    --bg-card: #FFFFFF;
+    --text: #383838;
+    --text-light: #666666;
+    --text-muted: #999999;
+    --gray-border: #dadbdb;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --radius-pill: 50px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html, body {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100dvh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  /* ===== Background Overlay ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('mbti_背景.svg') no-repeat center center;
+    background-size: cover;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body.showing-result::before {
+    display: none;
+  }
+
+  #intro, #quiz, #result {
+    position: relative;
+    z-index: 1;
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ===== Intro Page ===== */
+  #intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    text-align: center;
+  }
+
+  .intro-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 5vw;
+    gap: 3vh;
+  }
+
+  .intro-theme {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .intro-theme img {
+    width: min(375px, 80vw);
+    height: auto;
+    display: block;
+  }
+
+  .intro-tagline {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: min(320px, 80vw);
+  }
+
+  .intro-tagline p {
+    color: var(--text);
+    font-size: 11px;
+    line-height: 1.5;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    width: 100%;
+  }
+
+  .intro-tagline p:last-child {
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--text);
+  }
+
+  .intro-bottom {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .intro-bottom-img {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .intro-bottom-img img {
+    width: 150px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .btn-start {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: min(160px, 50vw);
+    min-width: 120px;
+    height: 44px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 20px rgba(28,160,92,0.35);
+    font-family: inherit;
+    letter-spacing: 2px;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .btn-start:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 10px rgba(28,160,92,0.3);
+  }
+
+
+  /* ===== Quiz Page ===== */
+  #quiz {
+    display: none;
+    flex-direction: column;
+  }
+
+  .quiz-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: transparent;
+    padding: calc(12px + var(--safe-top)) 5vw 0;
+  }
+
+  .quiz-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    height: 24px;
+  }
+
+  .quiz-q-number {
+    font-size: 14px;
+    font-weight: 600;
+    color: #5f5f5e;
+    text-shadow: 0 0 8px rgba(255,254,244,0.9), 0 0 4px rgba(255,254,244,0.95);
+  }
+
+  .quiz-progress-text {
+    font-size: 12px;
+    color: #5f5f5e;
+    font-weight: 500;
+    text-shadow: 0 0 8px rgba(255,254,244,0.9), 0 0 4px rgba(255,254,244,0.95);
+  }
+
+  .progress-bar-wrap {
+    height: 10px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: #5f5f5e;
+    border-radius: 5px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .quiz-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 10vw 100px;
+    min-height: 0;
+  }
+
+  .question-number {
+    display: none;
+  }
+
+  .question-text {
+    font-size: clamp(22px, 6.5vw, 28px);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px rgba(255,254,244,0.92), 0 0 6px rgba(255,254,244,0.96);
+    text-align: left;
+  }
+
+  .question-box {
+    height: 300px;
+    width: 100%;
+    padding-top: 50px;
+    flex-shrink: 0;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: auto;
+    padding-bottom: 20px;
+    flex-shrink: 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+
+  .option-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    background: rgba(255,254,244,0.85);
+    border: 1.5px solid #00a85f;
+    border-radius: 50px;
+    font-size: 15px;
+    color: #00a85f;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-family: inherit;
+    line-height: 1.3;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .option-btn:active {
+    transform: scale(0.98);
+  }
+
+  .option-btn.selected {
+    background: #00a85f;
+    color: #fff;
+    border-color: #00a85f;
+  }
+
+  .option-btn .option-label {
+    display: inline;
+    font-weight: 600;
+    margin-right: 2px;
+  }
+
+  .option-btn .option-desc {
+    display: inline;
+  }
+
+  .quiz-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: transparent;
+    padding: 10px 5vw calc(10px + var(--safe-bottom));
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .quiz-footer-inner {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .quiz-footer-inner > * {
+    pointer-events: auto;
+  }
+
+  .btn-prev {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 44px;
+    padding: 0 12px;
+    background: rgba(255,254,244,0.85);
+    color: #00a85f;
+    border: none;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    font-family: inherit;
+    font-weight: 500;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .btn-prev:active {
+    opacity: 0.6;
+  }
+
+  /* ===== Result Page ===== */
+  #result {
+    display: none;
+    position: relative;
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #result.fixed-bg {
+    height: auto;
+    min-height: 100dvh;
+  }
+
+
+  .result-content {
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: calc(var(--safe-top) + 8px) 5vw calc(4vh + var(--safe-bottom) + 8px);
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .result-inner {
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+  }
+
+  .result-actions {
+    margin-top: auto;
+  }
+
+
+
+
+  .result-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .result-header-label {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .result-mascot {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .result-mascot img {
+    width: min(150px, 40vw);
+    height: auto;
+    display: block;
+  }
+
+  .result-tagline {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #00a85f;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    text-shadow: 0 0 8px rgba(255,254,244,0.9);
+  }
+
+  .section-box {
+    border: 2px solid #00a85f;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    text-align: left;
+    background: rgba(255,254,244,0.85);
+  }
+
+  .section-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #00a85f;
+    margin-bottom: 8px;
+  }
+
+  .section-content {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-light);
+  }
+
+  .result-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: auto;
+    padding-left: 10px;
+  }
+
+  .result-actions button {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    font-family: inherit;
+  }
+
+  .result-actions button:active {
+    transform: scale(0.97);
+  }
+
+  .result-actions button img {
+    display: block;
+    height: 100%;
+    width: auto;
+    margin: 0 auto;
+  }
+
+  .btn-restart {
+    width: min(120px, 24vw);
+    height: 36px;
+  }
+
+  .btn-share {
+    width: min(160px, 28vw);
+    height: 36px;
+  }
+
+  /* ===== Animations ===== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .fade-in-up { animation: fadeInUp 0.35s ease forwards; }
+  .fade-in { animation: fadeIn 0.25s ease forwards; }
+  .scale-in { animation: scaleIn 0.3s ease forwards; }
+
+  /* ===== Confetti ===== */
+  .confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    top: -10px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    to {
+      transform: translateY(105vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  /* ===== QR Modal ===== */
+  .qr-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 5vw;
+  }
+
+  .qr-overlay.show { display: flex; }
+
+  .qr-modal {
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px 24px;
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+    animation: scaleIn 0.25s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+
+  .qr-modal h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .qr-modal p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .qr-modal img {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 16px;
+    display: block;
+    border-radius: 8px;
+  }
+
+  .qr-modal .btn-close-qr {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    min-width: 120px;
+    padding: 0 28px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid #f0f0f0;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .qr-modal .btn-close-qr:active {
+    border-color: var(--primary);
+  }
+
+  /* ===== Responsive small screens ===== */
+  @media (max-width: 380px) {
+    .intro-tagline p { font-size: 13px; }
+    .intro-tagline p:last-child { font-size: 15px; }
+    .question-text { font-size: 16px; }
+    .option-btn { padding: 12px 14px; min-height: 46px; }
+  }
+
+  @media (min-width: 420px) {
+    .types-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  }
+
+  @media (max-height: 640px) {
+    #intro { gap: 0; }
+    .intro-inner { gap: 1.5vh; padding: 3vw; }
+    .intro-theme img { width: min(200px, 50vw); }
+    .intro-tagline { width: min(200px, 50vw); }
+    .intro-bottom-img img { width: 140px; }
+    .btn-start { width: min(100px, 25vw); min-width: 100px; height: 40px; font-size: 16px; }
+    .quiz-body { padding: 2vh 5vw 90px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== INTRO ==================== -->
+<div id="intro">
+  <div class="intro-inner">
+    <div class="intro-theme">
+      <img src="mbti_主题.svg" alt="智味食空">
+    </div>
+
+    <div class="intro-tagline">
+      <p>每个人都有自己的进食习惯，选择逻辑和味觉偏好。</p>
+      <p>看看你是什么样的干饭人</p>
+    </div>
+
+    <div class="intro-bottom">
+      <button class="btn-start" onclick="startQuiz()">
+        开始测试
+      </button>
+    </div>
+  </div>
+
+  
+
+  <div class="intro-bottom-img">
+    <img src="未标题-4.png" alt="">
+  </div>
+</div>
+
+<!-- ==================== QUIZ ==================== -->
+<div id="quiz">
+  <div class="quiz-header">
+    <div class="quiz-header-inner">
+      <div class="quiz-q-number">第<span id="qCurrent">1</span>题</div>
+      <div class="quiz-progress-text"><span id="qAnswered">0</span>/<span id="qTotal">24</span></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="quiz-body" id="quizBody"></div>
+
+  <div class="quiz-footer">
+    <div class="quiz-footer-inner">
+      <button class="btn-prev" id="btnPrev" onclick="prevQuestion()">
+        <img src="mbti_上一题.svg" alt="" style="height:1em;width:auto;">
+        上一题
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== RESULT ==================== -->
+<div id="result">
+  <div class="result-content">
+    <div class="result-inner" id="resultContent"></div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+// 颜色映射
+const colorMap = {
+  INTJ:'紫', INTP:'紫', ENTJ:'紫', ENTP:'紫',
+  INFJ:'蓝', INFP:'蓝', ENFJ:'蓝', ENFP:'蓝',
+  ISTJ:'绿', ISFJ:'绿', ESTJ:'绿', ESFJ:'绿',
+  ISTP:'黄', ISFP:'黄', ESTP:'黄', ESFP:'黄'
+};
+
+// 颜色对应的色值
+const colorHex = {
+  '紫':'#BC87D8', '蓝':'#24B2D3', '绿':'#189F5C', '黄':'#FFDA2A'
+};
+
+const types = {
+  ISTJ: { name: '老样子人', tag: 'SAME', desc: '不是我没得选，是我懒得重新评估风险。' },
+  ISFJ: { name: '热乎饭人', tag: 'WARM', desc: '饭还热着，快吃。' },
+  ESTJ: { name: '到点吃饭人', tag: 'TIME', desc: '走了，晚了就排队啦。' },
+  ESFJ: { name: '一起吃饭人', tag: 'TEAM', desc: '人多好点菜，一起吧。' },
+  INTJ: { name: '算好再吃人', tag: 'PLAN', desc: '这家最快，那道最稳，走。' },
+  INTP: { name: '研究一下人', tag: 'WHY', desc: '等下，这个味道怎么做出来的？' },
+  ENTJ: { name: '别纠结人', tag: 'GO', desc: '别纠结了，就这家。' },
+  ENTP: { name: '哪里上新人', tag: 'NEWS', desc: '我知道有个新的，要不要试？' },
+  ISTP: { name: '吃完就走人', tag: 'FAST', desc: '我吃完了，你们慢慢吃，我先撤了。' },
+  ISFP: { name: '看眼缘人', tag: 'VIBE', desc: '就这个吧，看照片挺有感觉的。' },
+  ESTP: { name: '够味才行人', tag: 'HOT', desc: '老板，这菜不够味啊，能再加点辣吗？' },
+  ESFP: { name: '凑热闹人', tag: 'SHOW', desc: '那边好像有活动，去看看！' },
+  INFJ: { name: '慢慢吃饭人', tag: 'SLOW', desc: '我想慢慢吃完。' },
+  INFP: { name: '逃离日常人', tag: 'RUN', desc: '我想吃点不一样的。' },
+  ENFJ: { name: '都来尝尝人', tag: 'SHARE', desc: '这个真的可以，你尝一口。' },
+  ENFP: { name: '开盲盒人', tag: 'BOX', desc: '今天来点没吃过的吧！' }
+};
+
+const fullDesc = {
+  ISTJ: '别人吃饭是为了探索世界，我吃饭是为了给大脑省电。翻了三页菜单又回到第一页？别劝我尝鲜了，成年人的顶级安全感，就是那道闭着眼点都不会踩雷的菜。美食内核：极致节能，深情专一，拒绝盲盒，5计划达人',
+  ISFJ: '对你来说，最好的暖宝宝不是贴身上的，是端手里的。一碗刚出锅的汤、一份温度刚好的米饭、一道熟悉的家常菜——这些热气腾腾的瞬间，就是最戳心的治愈。所以当别人发朋友圈打卡网红店时，你默默记下的不是店名，而是那个替你盛汤、帮你留菜、记得你不吃香菜的人。美食内核：热气腾腾、安心、温度刚好',
+  ESTJ: '恭喜您，测出了干饭界最无情的高效人格。在你的世界里，活是永远干不完的，但饭冷了就不好吃了。秒针归零，工作秒停，你用最硬核的执行力瞬间带队转场、卡点下单，一秒都不耽误。别人还在原地纠结"吃啥/去哪"，你已经用一句"位置订好了，跟我走"，完成了对干饭节奏的绝对推进。美食内核：高效干饭、精准卡点、绝对推进、行动派',
+  ESFJ: '恭喜您，测出了美食界最离不开人类的破冰大师。你坚信只有人聚在一起，饭菜才算有了灵魂。你天生自带强烈的组局磁场，用热闹的烟火气当做调味剂，把每个人凑在一起，让普通的饭局变成美味加倍的盛宴。别人是在独自应付一日三餐，你是在用发光发热的灵魂，把孤独的进食变成人情味十足、越吃越香的快乐源泉。',
+  INTJ: '恭喜您，测出了美食界最冷静的顶级战略部署大师。在你的世界里，吃饭从不是随意的填饱肚子，而是一场容不得半点失误的降本增效。你不仅追求出品稳定、信息透明的餐厅，更有底气在别人盲目尝鲜时，用数据和逻辑迅速筛选出性价比最高的"最优解"。别人是在凭直觉开盲盒、四处踩雷，你是在心里拨算盘，绝不吃一顿冤枉饭。',
+  INTP: '恭喜您，测出了美食界最神秘的风味拆解专家。对你来说，把美食背后藏着的门道琢磨透了才叫不、白、吃。哪怕面对一盘普通的土豆丝，你也能敏锐地察觉出今天是厨师火候给猛了，还是醋倒早了半秒钟。别人是在用嘴巴给胃垫底，你是在用脑子跟主厨隔空过招，虽然表面稳如老狗，内心其实已经把这道菜的配方给彻底看穿了！美食内核：风味拆解、本质洞察、技术干饭',
+  ENTJ: '你从不纠结吃什么，遵循内心的直觉。你最受不了的饭桌场面，就是一群人围着"吃什么"无限循环…再纠结下去，你觉得连饭菜都要凉透了！"随便、都行、你定吧"在你这里绝对撑不过三秒，你会用极快的速度过滤无效选项，然后直接一锤定音！美食内核：终结内耗、反内耗、控场王',
+  ENTP: '你是美食世界里的情报雷达。恭喜您，您是最稀有的美食界情报局局长。你不是单纯的嘴馋，而是骨子里按捺不住对新鲜感的好奇，吃饭对你来说更像是一场对城市的寻宝游戏。哪里开了新店、哪里有隐藏菜单，你总能抢先一步抓到风声，看到"新品"或者"期间限定"这几个字你就挪不动道。别人是在保守地重复安全牌，你是在不知疲倦地开辟新大陆，哪怕偶尔踩雷你也觉得是一次刺激的冒险。美食内核：探险、新鲜至上、好奇心',
+  ISTP: '恭喜您，测出了美食界最极简纯粹的干饭人。在你的世界里，干饭就是一场最纯粹的能量补充，过程越直接、步骤越少越好。不拍照也不评价，吃饱了腿绝不多留一秒。别人是在吃情调和氛围，你是在给身体充电。对你来说，对一家店最高的致敬，就是下次默默再来、用身体诚实复购。极简主义、无感社交、诚实复购',
+  ISFP: '恭喜您，测出了美食界最相信直觉的颜值买单员。你点菜从来不看什么排行榜和大数据，全凭在菜单前那一秒的怦然心动。只要摆盘颜色顺眼、名字好听、甚至只是餐厅的灯光刚好长在你的审美点上，你就会毫不犹豫地陷进去。为了那一瞬间的心动，踩个雷你也认了。直觉点单、视觉动物、氛围充能',
+  ESTP: '恭喜您，测出了美食界最不甘寂寞的重口味爱好者。你必须得有香、辣、酸、麻、浓、脆的直接刺激，一口下去能让天灵盖清醒的重口味，才算真正安抚了你的灵魂。你不需要精致的法式摆盘，而是必须要听到最接地气的热气、锅气和烟火气，要么让你直呼过瘾，要么下次再见。美食内核：直接过瘾、锅气至上、味觉引领',
+  ESFP: '恭喜您，测出了美食界最喜欢全场围观的气氛组组长。你根本不可能安安静静坐着把一顿饭吃完，只要周围有点风吹草动，你的雷达就响了。哪里在排长队、哪里上新品、哪里搞活动买一送一，哪怕你原本只是路过，最后也一定会莫名其妙混进队伍里。美食内核：氛围大师、快乐至上',
+  INFJ: '恭喜您，测出了美食界最松弛的干饭人。对你来说，世界再乱，好好吃饭也是不可动摇的底线。你抗拒被外界的混乱和紧迫带偏节奏，哪怕手头的事情再多、天大的事在催，只要坐到饭桌前，你就能瞬间构筑起自己的结界。一口口慢条斯理地品尝，把浮躁的气流挡在身外——外面风雨大作，我自定心吃饭。',
+  INFP: '恭喜您，测出了美食界最擅长自救的生活小型出逃家。当工位和待办事项把你压得喘不过气时，一顿热腾腾、甜丝丝的饭，就是你夺回生活掌控权的唯一武器。你最怕把吃饭应付成另外一项打卡任务，如果只是"顺便吃点"，那这顿饭对你来说就彻底失去了灵魂。你可能会为了一个突然想吃的蛋糕跑两公里，也会因为一家店温暖的氛围瞬间被治愈。',
+  ENFJ: '只要你觉得哪道菜不错，就很难忍住不推荐。你会夹给别人尝，会说"这个真的可以"，会观察大家吃完的反应。你不是只关心自己吃得好不好，也希望身边的人不要错过好东西。你很会把味道变成话题，把一顿饭变成连接。朋友聚餐时，你往往是那个调动气氛的人。你能照顾不同人的口味，也愿意让每个人都参与进来。对你来说，好吃如果只发生在自己嘴里，就少了一半快乐。分享，是你享受美食的重要部分。',
+  ENFP: '你希望吃饭这件事永远有一点未知剧情。恭喜您，测出了美食界最停不下来的探险家。如果让你每天重复同样的路线、吃同样的快餐，你大概会觉得自己的生活正在变成一潭死水。不管是隐藏菜单、奇葩联名、还是街角那家连招牌都没有的陌生小店，都能瞬间拉满你的好奇心。你根本不在乎什么避坑指南，在你眼里踩雷不过是给明天多攒了一个好玩的段子，没有新鲜感才是真的完蛋。'
+};
+
+const shortSymptoms = {
+  ISTJ: '进店直奔老位置，张嘴就是"老三样"。服务员连菜单都不用递，看我一眼就知道要什么。',
+  ISFJ: '看到"热汤""现煮""刚出锅"会自动心动。一道菜如果让你觉得暖，你会反复想起它。',
+  ESTJ: '饭点一到，身体比脑子先站起来。别人还在问"要不要再看看"，你已经准备下单。',
+  ESFJ: '饭前先问："今天谁跟我一起吃？"点菜时雷达全开，一边看菜单一边默念"他吃辣、她减肥、他最近要清淡"。',
+  INTJ: '点菜前会先看评分、距离、排队、评价关键词。别人凭直觉点菜，你在做综合决策。',
+  INTP: '吃着吃着，突然开始分析这道菜的结构。',
+  ENTJ: '别人还在翻菜单，你已经下单了。朋友说"我都可以"，你会说"那就这个"。',
+  ENTP: '看到"新品""限定""隐藏菜单"会自动靠近。别人刚听说，你已经研究完第一批评价。',
+  ISTP: '别人还在拍照，你已经吃到一半。吃完后不会发表长篇感想，只会说："还行。"',
+  ISFP: '菜单不用看完，眼缘到了就合上。别人问你为什么点这个，你会说："看着顺眼。"',
+  ESTP: '一看到重油重辣、贼下饭的菜，眼睛瞬间比谁都亮。',
+  ESFP: '本来只是看看，最后已经加入队伍。看到活动摊位会自动减速。',
+  INFJ: '不喜欢边赶时间边吃饭。一顿好饭能让你重新整理自己。',
+  INFP: '忙到很累时，会突然很想吃"有期待感"的东西。不是饿了才想吃，是需要被生活安慰一下。',
+  ENFJ: '一吃到好菜，立刻开始安利。你点的菜经常变成全桌公用菜。',
+  ENFP: '看到"新品"两个字，注意力自动锁定。菜单越有未知感，你越兴奋。'
+};
+
+
+// ===== QUESTIONS =====
+const questions = [
+  // ===== 维度一：饭搭子雷达 E/I =====
+  {
+    q: '朋友问你"要不要一起吃饭"，你第一反应是？',
+    dim: 'EI',
+    options: [
+      { label: 'A', text: '走啊，人多才好点菜。', score: { E: 1, I: 0 } },
+      { label: 'B', text: '看今天状态，饿的时候谁都行。', score: { E: 0.5, I: 0.5 } },
+      { label: 'C', text: '我想自己安静吃完，别 cue 我。', score: { E: 0, I: 1 } }
+    ]
+  },
+  {
+    q: '吃到一道不错的菜，你通常会？',
+    dim: 'EI',
+    options: [
+      { label: 'A', text: '立刻安利："这个可以，你们尝尝。"', score: { E: 1, I: 0 } },
+      { label: 'B', text: '先自己认真吃完，真的不错再推荐。', score: { E: 0.5, I: 0.5 } },
+      { label: 'C', text: '默默记住，下次想吃的时候自己再点。', score: { E: 0, I: 1 } }
+    ]
+  },
+  {
+    q: '聚餐时大家都说"随便"，你会？',
+    dim: 'EI',
+    options: [
+      { label: 'A', text: '主动推进："那就这家吧。"', score: { E: 1, I: 0 } },
+      { label: 'B', text: '看谁先开口，我可以配合。', score: { E: 0.5, I: 0.5 } },
+      { label: 'C', text: '内心希望别人赶紧决定，我不想管。', score: { E: 0, I: 1 } }
+    ]
+  },
+  {
+    q: '一个人吃饭对你来说是？',
+    dim: 'EI',
+    options: [
+      { label: 'A', text: '可以，但总觉得少了点饭味。', score: { E: 1, I: 0 } },
+      { label: 'B', text: '偶尔挺好，偶尔也想有人一起。', score: { E: 0.5, I: 0.5 } },
+      { label: 'C', text: '太舒服了，饭点免打扰模式。', score: { E: 0, I: 1 } }
+    ]
+  },
+  {
+    q: '一顿饭最容易被你记住的部分是？',
+    dim: 'EI',
+    options: [
+      { label: 'A', text: '和谁一起吃、聊了什么。', score: { E: 1, I: 0 } },
+      { label: 'B', text: '菜和人都重要，看哪边更出彩。', score: { E: 0.5, I: 0.5 } },
+      { label: 'C', text: '那道菜本身好不好吃。', score: { E: 0, I: 1 } }
+    ]
+  },
+  {
+    q: '饭桌上有人问"这个好吃吗"，你会？',
+    dim: 'EI',
+    options: [
+      { label: 'A', text: '认真评价，还会顺便推荐别的。', score: { E: 1, I: 0 } },
+      { label: 'B', text: '简单说两句，好吃就说好吃。', score: { E: 0.5, I: 0.5 } },
+      { label: 'C', text: '点点头，继续吃自己的。', score: { E: 0, I: 1 } }
+    ]
+  },
+  // ===== 维度二：点菜人格 S/N =====
+  {
+    q: '菜单上出现新品，你会？',
+    dim: 'SN',
+    options: [
+      { label: 'A', text: '先等等，经典款还没背叛过我。', score: { S: 1, N: 0 } },
+      { label: 'B', text: '观察一下，看看别人怎么说。', score: { S: 0.5, N: 0.5 } },
+      { label: 'C', text: '点！不好吃也算人生素材。', score: { S: 0, N: 1 } }
+    ]
+  },
+  {
+    q: '点外卖或点餐时，你更常打开的是？',
+    dim: 'SN',
+    options: [
+      { label: 'A', text: '收藏夹，老朋友们都在里面。', score: { S: 1, N: 0 } },
+      { label: 'B', text: '先看收藏，再看看今天有没有新东西。', score: { S: 0.5, N: 0.5 } },
+      { label: 'C', text: '新店榜 / 新品区，今天想换个世界。', score: { S: 0, N: 1 } }
+    ]
+  },
+  {
+    q: '朋友推荐一家没吃过的店，你会？',
+    dim: 'SN',
+    options: [
+      { label: 'A', text: '先问："稳吗？踩雷率高不高？"', score: { S: 1, N: 0 } },
+      { label: 'B', text: '看评价和距离，合适就去。', score: { S: 0.5, N: 0.5 } },
+      { label: 'C', text: '走啊，不试怎么知道。', score: { S: 0, N: 1 } }
+    ]
+  },
+  {
+    q: '如果连续几天吃差不多的东西，你会？',
+    dim: 'SN',
+    options: [
+      { label: 'A', text: '挺好，省心、稳定、安全。', score: { S: 1, N: 0 } },
+      { label: 'B', text: '可以接受，但最好偶尔换换。', score: { S: 0.5, N: 0.5 } },
+      { label: 'C', text: '不行，生活像被按了循环播放。', score: { S: 0, N: 1 } }
+    ]
+  },
+  {
+    q: '你点菜时更像？',
+    dim: 'SN',
+    options: [
+      { label: 'A', text: '先找熟悉的菜，保底最重要。', score: { S: 1, N: 0 } },
+      { label: 'B', text: '熟悉和新鲜各点一点。', score: { S: 0.5, N: 0.5 } },
+      { label: 'C', text: '专挑没吃过的，看看它什么来头。', score: { S: 0, N: 1 } }
+    ]
+  },
+  {
+    q: '听说有个"隐藏吃法"，你会？',
+    dim: 'SN',
+    options: [
+      { label: 'A', text: '先不了，正常吃法就挺稳。', score: { S: 1, N: 0 } },
+      { label: 'B', text: '如果有人试过说不错，我可以跟着试。', score: { S: 0.5, N: 0.5 } },
+      { label: 'C', text: '立刻想试，感觉解锁了吃饭隐藏关卡。', score: { S: 0, N: 1 } }
+    ]
+  },
+  // ===== 维度三：味觉信仰 T/F =====
+  {
+    q: '一家店让你放心的原因是？',
+    dim: 'TF',
+    options: [
+      { label: 'A', text: '它很少让我失望，每次都差不多稳。', score: { T: 1, F: 0 } },
+      { label: 'B', text: '稳定重要，但偶尔有惊喜也不错。', score: { T: 0.5, F: 0.5 } },
+      { label: 'C', text: '它有自己的状态和烟火气，不是机械复制。', score: { T: 0, F: 1 } }
+    ]
+  },
+  {
+    q: '同一道菜这次和上次差别很大，你会？',
+    dim: 'TF',
+    options: [
+      { label: 'A', text: '有点介意，稳定性不够。', score: { T: 1, F: 0 } },
+      { label: 'B', text: '看差别是变好还是变差。', score: { T: 0.5, F: 0.5 } },
+      { label: 'C', text: '能理解，手作和现场状态本来会变化。', score: { T: 0, F: 1 } }
+    ]
+  },
+  {
+    q: '吃到一道好菜，你更容易想？',
+    dim: 'TF',
+    options: [
+      { label: 'A', text: '它的火候、配比、时间点一定有讲究。', score: { T: 1, F: 0 } },
+      { label: 'B', text: '先享受，之后再想为什么好吃。', score: { T: 0.5, F: 0.5 } },
+      { label: 'C', text: '说不清哪里好，就是吃到那一刻觉得对了。', score: { T: 0, F: 1 } }
+    ]
+  },
+  {
+    q: '你更容易被哪种表达打动？',
+    dim: 'TF',
+    options: [
+      { label: 'A', text: '"这道菜经过多次调试，出品很稳定。"', score: { T: 1, F: 0 } },
+      { label: 'B', text: '"既有标准，也保留了现场的味道。"', score: { T: 0.5, F: 0.5 } },
+      { label: 'C', text: '"这是师傅凭经验和火候做出来的。"', score: { T: 0, F: 1 } }
+    ]
+  },
+  {
+    q: '你对一道菜的最高评价更接近？',
+    dim: 'TF',
+    options: [
+      { label: 'A', text: '"它每次都很稳。"', score: { T: 1, F: 0 } },
+      { label: 'B', text: '"它稳定，但也有记忆点。"', score: { T: 0.5, F: 0.5 } },
+      { label: 'C', text: '"它有灵魂，有锅气。"', score: { T: 0, F: 1 } }
+    ]
+  },
+  {
+    q: '你更不能接受哪种情况？',
+    dim: 'TF',
+    options: [
+      { label: 'A', text: '今天好吃，明天完全不是那个味。', score: { T: 1, F: 0 } },
+      { label: 'B', text: '看情况，偶尔波动可以接受。', score: { T: 0.5, F: 0.5 } },
+      { label: 'C', text: '很标准，但吃起来没有温度。', score: { T: 0, F: 1 } }
+    ]
+  },
+  // ===== 维度四：饭点节奏 J/P =====
+  {
+    q: '到饭点时，手头还有事，你会？',
+    dim: 'JP',
+    options: [
+      { label: 'A', text: '先放一放，吃完饭人才能重新启动。', score: { J: 1, P: 0 } },
+      { label: 'B', text: '看事情急不急，不急就先吃。', score: { J: 0.5, P: 0.5 } },
+      { label: 'C', text: '先处理完，吃饭可以晚一点。', score: { J: 0, P: 1 } }
+    ]
+  },
+  {
+    q: '你理想中的一顿饭是？',
+    dim: 'JP',
+    options: [
+      { label: 'A', text: '坐下来，好好吃完，整个人缓过来。', score: { J: 1, P: 0 } },
+      { label: 'B', text: '不用太讲究，但别太匆忙。', score: { J: 0.5, P: 0.5 } },
+      { label: 'C', text: '快、准、饱，吃完继续干活。', score: { J: 0, P: 1 } }
+    ]
+  },
+  {
+    q: '吃饭被催时，你会？',
+    dim: 'JP',
+    options: [
+      { label: 'A', text: '有点烦，我还没和这顿饭相处完。', score: { J: 1, P: 0 } },
+      { label: 'B', text: '可以快一点，但别太狼狈。', score: { J: 0.5, P: 0.5 } },
+      { label: 'C', text: '没事，吃完就行，效率第一。', score: { J: 0, P: 1 } }
+    ]
+  },
+  {
+    q: '如果今天只能随便吃点，你会？',
+    dim: 'JP',
+    options: [
+      { label: 'A', text: '心里有点遗憾，感觉少了个暂停键。', score: { J: 1, P: 0 } },
+      { label: 'B', text: '可以接受，但希望明天吃好点。', score: { J: 0.5, P: 0.5 } },
+      { label: 'C', text: '完全可以，任务完成就行。', score: { J: 0, P: 1 } }
+    ]
+  },
+  {
+    q: '对你来说，吃饭更像？',
+    dim: 'JP',
+    options: [
+      { label: 'A', text: '一天里值得认真对待的小片刻。', score: { J: 1, P: 0 } },
+      { label: 'B', text: '有时是享受，有时是补能。', score: { J: 0.5, P: 0.5 } },
+      { label: 'C', text: '给身体充电，别耽误正事。', score: { J: 0, P: 1 } }
+    ]
+  },
+  {
+    q: '如果一顿饭等太久、流程很复杂，你会？',
+    dim: 'JP',
+    options: [
+      { label: 'A', text: '如果值得，也愿意慢慢等。', score: { J: 1, P: 0 } },
+      { label: 'B', text: '看值不值得，不值得就换。', score: { J: 0.5, P: 0.5 } },
+      { label: 'C', text: '直接失去耐心，吃饭别搞这么复杂。', score: { J: 0, P: 1 } }
+    ]
+  }
+];
+
+// ===== STATE =====
+let currentQ = 0;
+let answers = new Array(questions.length).fill(null);
+let scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+
+// ===== INIT =====
+document.getElementById('qTotal').textContent = questions.length;
+
+// ===== FUNCTIONS =====
+function startQuiz() {
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('quiz').style.display = 'flex';
+  currentQ = 0;
+  renderQuestion();
+  updateProgress();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const body = document.getElementById('quizBody');
+  body.style.opacity = '0';
+
+  setTimeout(() => {
+    const optHtml = q.options.map((opt, i) => {
+      const sel = answers[currentQ] === i ? 'selected' : '';
+      return `<button class="option-btn ${sel}" onclick="selectOption(${i})">
+        <span><span class="option-label">${opt.label}.</span> <span class="option-desc">${opt.text}</span></span>
+      </button>`;
+    }).join('');
+
+    body.innerHTML = `
+      <div class="fade-in-up" style="display:flex;flex-direction:column;flex:1;">
+        <div class="question-box">
+          <div class="question-text">${q.q}</div>
+        </div>
+        <div class="options">${optHtml}</div>
+      </div>
+    `;
+    body.style.opacity = '1';
+  }, 150);
+
+  document.getElementById('btnPrev').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
+
+  updateProgress();
+}
+
+function selectOption(idx) {
+  answers[currentQ] = idx;
+
+  // Show selected state immediately
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.classList.toggle('selected', i === idx);
+  });
+
+  // Disable further clicks during transition
+  btns.forEach(btn => { btn.style.pointerEvents = 'none'; });
+
+  setTimeout(() => {
+    if (currentQ < questions.length - 1) {
+      currentQ++;
+      renderQuestion();
+    } else {
+      submitQuiz();
+    }
+  }, 250);
+}
+
+function prevQuestion() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+  }
+}
+
+function updateProgress() {
+  const answered = answers.filter(a => a !== null).length;
+  const pct = Math.round((answered / questions.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('qCurrent').textContent = currentQ + 1;
+  document.getElementById('qAnswered').textContent = answered;
+}
+
+function submitQuiz() {
+  scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+  questions.forEach((q, i) => {
+    if (answers[i] !== null) {
+      const s = q.options[answers[i]].score;
+      for (let key in s) {
+        scores[key] += s[key];
+      }
+    }
+  });
+
+  const result =
+    (scores.E >= scores.I ? 'E' : 'I') +
+    (scores.S >= scores.N ? 'S' : 'N') +
+    (scores.T >= scores.F ? 'T' : 'F') +
+    (scores.J >= scores.P ? 'J' : 'P');
+
+  showResult(result);
+}
+
+function showResult(code) {
+  document.getElementById('quiz').style.display = 'none';
+  document.body.classList.add('showing-result');
+
+
+
+  const resultEl = document.getElementById('result');
+  resultEl.style.display = 'block';
+  document.querySelector('.result-content').style.backgroundImage = `url(颜色区分/${colorMap[code]}/0.jpg)`;
+
+  const t = types[code];
+  const desc = fullDesc[code];
+
+  const dims = [
+    { label: '内向 / 外向', l: 'I', r: 'E', lv: scores.I, rv: scores.E },
+    { label: '感性 / 直觉', l: 'S', r: 'N', lv: scores.S, rv: scores.N },
+    { label: '理性 / 感性', l: 'T', r: 'F', lv: scores.T, rv: scores.F },
+    { label: '计划 / 随性', l: 'J', r: 'P', lv: scores.J, rv: scores.P }
+  ];
+
+  const dimHtml = dims.map(d => {
+    const total = d.lv + d.rv || 1;
+    const pct = Math.round((d.rv / total) * 100);
+    const leftPct = Math.round((d.lv / total) * 100);
+    const dimVal = code.includes(d.r) ? d.r : d.l;
+    return `
+      <div class="dimension-item scale-in">
+        <div class="dimension-label">${d.label}</div>
+        <div class="dimension-value ${dimVal.toLowerCase()}">${dimVal === d.r ? `${d.r} / ${d.l}` : `${d.l} / ${d.r}`}</div>
+        <div class="dimension-bar">
+          <div class="dimension-bar-fill ${pct > 50 ? 'right' : 'left'}"
+               style="width:${Math.max(pct, leftPct)}%;"></div>
+        </div>
+        <div class="dimension-bar-labels">
+          <span>${d.l} <small>${leftPct}%</small></span>
+          <span><small>${pct}%</small> ${d.r}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const allTypesHtml = Object.entries(types).map(([c, t]) => {
+    const active = c === code ? 'style="border-color:var(--primary);background:var(--primary-light);"' : '';
+    return `<div class="type-card-mini" ${active} onclick="showResult('${c}')">
+      <div class="mini-code">${t.name}</div>
+      <div class="mini-name">${t.tag}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('resultContent').innerHTML = `
+    <div class="result-header scale-in" style="border-radius:8px;padding:12px;margin-bottom:0">
+      <div class="result-header-label" style="font-size:13px;color:#999;margin-bottom:100px;margin-top:10px">您的测试结果</div>
+      <div class="result-header-label">你的美食人格类型是</div>
+      <div class="result-header-tag" style="color:${colorHex[colorMap[code]]};font-weight:700;font-size:56px;text-align:center;margin:4px 0">${t.tag}</div>
+      <div class="result-header-name" style="color:#000;font-weight:700;font-size:20px;text-align:center;margin:2px 0 8px">${t.name}</div>
+      <div class="result-header-quote" style="font-size:14px;text-align:center;color:#666;margin-bottom:12px;line-height:1.6">&#8220;${t.desc}&#8221;</div>
+      <div class="result-mascot">
+        <img src="人格图片/${code}.png" alt="" onerror="this.src='人格图片/${code}.jpg'">
+      </div>
+    </div>
+
+    ${(() => {
+      const idx = desc.indexOf('美食内核');
+      const raw = idx !== -1 ? desc.substring(idx + 5).replace(/[：:]\s*/, '') : '';
+      const keywords = raw.split(/[，、,]/).map(s => s.trim()).filter(Boolean);
+      const color = colorMap[code];
+      const hex = colorHex[color];
+      const bgFile = color === '绿' ? `${color}/11.png` : `${color}/1.svg`;
+      return `<div class="keyword-grid" style="border-radius:8px;padding:8px;display:flex;flex-wrap:wrap;gap:2px;justify-content:center">
+        ${keywords.map(k => `<div class="keyword-item" style="background-image:url(颜色区分/${bgFile});background-size:100%;background-repeat:no-repeat;background-position:center;width:30%;min-width:80px;padding:8px 4px;text-align:center;font-size:13px;font-weight:600;color:#333;display:flex;align-items:center;justify-content:center;min-height:44px">#${k}</div>`).join('')}
+      </div>`;
+    })()}
+
+    ${(() => {
+      const c = colorMap[code];
+      const bg5 = c === '绿' ? `颜色区分/${c}/55.png` : `颜色区分/${c}/5.svg`;
+      const icon3 = c === '绿' ? `颜色区分/${c}/33.png` : `颜色区分/${c}/3.svg`;
+      const h = colorHex[c];
+      const contentText = (() => {
+        const idx = desc.indexOf('美食内核');
+        return idx !== -1 ? desc.substring(0, idx) : desc;
+      })();
+      // 第一句加粗+颜色，剩余内容按句分段
+      const firstDot = contentText.indexOf('。');
+      const firstLine = firstDot !== -1 ? contentText.substring(0, firstDot + 1) : contentText;
+      const restRaw = firstDot !== -1 ? contentText.substring(firstDot + 1).trim() : '';
+      // 将剩余内容按句号/问号分段，每段独立一行
+      const restParagraphs = restRaw.split(/(?<=[。！？])/).map(s => s.trim()).filter(Boolean);
+      return `<div style="background-image:url(${bg5});background-size:cover;background-position:center;background-repeat:no-repeat;border-radius:8px;padding:14px 12px;margin-bottom:14px;max-width:86%;margin-left:auto;margin-right:auto">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <img src="${icon3}" style="height:28px;width:auto;display:block">
+          <span style="font-size:17px;font-weight:700;color:${h}">美食人格解读</span>
+        </div>
+        <img src="颜色区分/通用元素/虚线.svg" style="width:100%;display:block;margin-bottom:4px;margin-top:-5px">
+        <div style="font-size:14px;line-height:1.3;color:var(--text-light)">
+          <p style="font-weight:700;color:${h};margin:0 0 6px 0">${firstLine}</p>
+          ${restParagraphs.map(p => `<p style="margin:0 0 4px 0">${p}</p>`).join('')}
+        </div>
+      </div>`;
+    })()}
+
+    ${(() => {
+      const c = colorMap[code];
+      const bg5 = c === '绿' ? `颜色区分/${c}/55.png` : `颜色区分/${c}/5.svg`;
+      const icon3 = c === '绿' ? `颜色区分/${c}/33.png` : `颜色区分/${c}/3.svg`;
+      const h = colorHex[c];
+      const sympText = shortSymptoms[code];
+      const firstDot = sympText.indexOf('。');
+      const firstLine = firstDot !== -1 ? sympText.substring(0, firstDot + 1) : sympText;
+      const restRaw = firstDot !== -1 ? sympText.substring(firstDot + 1).trim() : '';
+      const restParagraphs = restRaw.split(/(?<=[。！？])/).map(s => s.trim()).filter(Boolean);
+      return `<div style="background-image:url(${bg5});background-size:cover;background-position:center;background-repeat:no-repeat;border-radius:8px;padding:14px 12px;margin-bottom:14px;max-width:86%;margin-left:auto;margin-right:auto">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <img src="${icon3}" style="height:28px;width:auto;display:block">
+          <span style="font-size:17px;font-weight:700;color:${h}">人格典型症状</span>
+        </div>
+        <img src="颜色区分/通用元素/虚线.svg" style="width:100%;display:block;margin-bottom:4px;margin-top:-5px">
+        <div style="font-size:14px;line-height:1.3;color:var(--text-light)">
+          <p style="margin:0 0 6px 0">${firstLine}</p>
+          ${restParagraphs.map(p => `<p style="margin:0 0 4px 0">${p}</p>`).join('')}
+        </div>
+      </div>`;
+    })()}
+
+    <div class="result-actions" style="border-radius:8px;padding:12px;margin-top:10px">
+      <button class="btn-restart" onclick="restartQuiz()"><img src="颜色区分/${colorMap[code]}/6.svg" alt="再测一次" onerror="this.src='颜色区分/${colorMap[code]}/66.png'"></button>
+      <button class="btn-share" onclick="showQR()"><img src="颜色区分/${colorMap[code]}/7.svg" alt="分享给朋友" onerror="this.src='颜色区分/${colorMap[code]}/77.png'"></button>
+    </div>
+  `;
+
+  launchConfetti();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  currentQ = 0;
+  answers = new Array(questions.length).fill(null);
+  document.body.classList.remove('showing-result');
+  document.getElementById('result').style.display = 'none';
+  document.querySelector('.result-content').style.backgroundImage = '';
+  document.getElementById('intro').style.display = 'flex';
+  window.scrollTo({ top: 0 });
+}
+
+function launchConfetti() {
+  const container = document.createElement('div');
+  container.className = 'confetti-container';
+  const colors = ['#1ca05c', '#4CAF50', '#81C784', '#ffb74d', '#4A90D9', '#7CB342', '#AB47BC', '#E91E63'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (Math.random() * 6 + 4) + 'px';
+    piece.style.height = (Math.random() * 6 + 4) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+    piece.style.animationDelay = (Math.random() * 1.5) + 's';
+    container.appendChild(piece);
+  }
+  document.body.appendChild(container);
+  setTimeout(() => container.remove(), 4000);
+}
+
+// ===== QR Code Share =====
+function showQR() {
+  const overlay = document.getElementById('qrOverlay');
+  const img = document.getElementById('qrImg');
+  const url = window.location.href;
+  document.getElementById('qrUrl').textContent = url;
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(url);
+  overlay.classList.add('show');
+}
+
+function closeQR() {
+  document.getElementById('qrOverlay').classList.remove('show');
+}
+</script>
+
+<!-- ===== QR Modal ===== -->
+<div class="qr-overlay" id="qrOverlay" onclick="if(event.target===this)closeQR()">
+  <div class="qr-modal">
+    <h3>掏手机扫一扫</h3>
+    <p>让朋友也来测试你的美食人格</p>
+    <img id="qrImg" src="" alt="QR Code">
+    <p style="font-size:12px;color:#999;word-break:break-all;margin-bottom:16px" id="qrUrl"></p>
+    <button class="btn-close-qr" onclick="closeQR()">关闭</button>
+  </div>
+</div>
+
+</body>
+</html>
